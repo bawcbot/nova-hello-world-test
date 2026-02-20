@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const Database = require('better-sqlite3');
@@ -28,6 +29,15 @@ const updateScore = db.prepare('UPDATE scores SET score = ?, updated_at = ? WHER
 const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+const htmlPath = path.join(__dirname, 'public', 'index.html');
+const getHtmlWithScript = () => {
+  const baseHtml = fs.readFileSync(htmlPath, 'utf8');
+  if (baseHtml.includes('<script type="module" src="/app.js"></script>')) {
+    return baseHtml;
+  }
+  return baseHtml.replace('</body>', '<script type="module" src="/app.js"></script></body>');
+};
 
 app.get('/api/leaderboard', (req, res) => {
   const scores = getTopScores.all();
@@ -62,7 +72,7 @@ app.post('/api/save', (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.type('html').send(getHtmlWithScript());
 });
 
 const PORT = process.env.PORT || 3000;

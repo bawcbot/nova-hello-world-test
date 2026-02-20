@@ -118,7 +118,7 @@ const loadLeaderboard = async () => {
 
     data.scores.forEach((row, index) => {
       const tr = document.createElement('tr');
-      const date = new Date(row.updatedAt).toLocaleString();
+      const date = row.createdAt ? new Date(row.createdAt).toLocaleString() : '—';
       [index + 1, row.name, row.score, date].forEach((value) => {
         const td = document.createElement('td');
         td.textContent = value;
@@ -126,6 +126,14 @@ const loadLeaderboard = async () => {
       });
       tbody.appendChild(tr);
     });
+    if (!data.scores.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 4;
+      td.textContent = 'Be the first to save a score!';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
   } catch (error) {
     console.error('Failed to load leaderboard', error);
   }

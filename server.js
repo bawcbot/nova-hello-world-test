@@ -17,9 +17,9 @@ db.prepare(`
 `).run();
 
 const getTopScores = db.prepare(`
-  SELECT name, score, updated_at AS updatedAt
+  SELECT name, score, updated_at AS createdAt
   FROM scores
-  ORDER BY score DESC, datetime(updated_at) ASC
+  ORDER BY score DESC, datetime(updated_at) DESC
   LIMIT 10
 `);
 const getScoreByName = db.prepare('SELECT score FROM scores WHERE name = ?');
@@ -71,7 +71,7 @@ app.post('/api/save', (req, res) => {
   return res.json({ status: 'ignored', reason: 'Existing score is higher' });
 });
 
-app.get('*', (req, res) => {
+app.get('/', (req, res) => {
   res.type('html').send(getHtmlWithScript());
 });
 

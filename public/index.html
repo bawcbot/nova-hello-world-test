@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nova Persistent Click Counter</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  h1 {
+    text-align: center;
+  }
+  label, input, button {
+    display: block;
+    margin: 0.5rem 0;
+  }
+  .error {
+    color: red;
+    font-size: 0.9rem;
+  }
+  .counter {
+    font-size: 4rem;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<h1>Persistent Click Counter</h1>
+<label for="name">Your name:</label>
+<input type="text" id="name" autocomplete="off" />
+<div class="counter" id="counter">0</div>
+<button id="clickBtn">Click Me</button>
+<button id="saveBtn">Save Score</button>
+<p class="error" id="error"></p>
+<div id="leaderboard"></div>
+<script>
+  (() => {
+    const counterEl = document.getElementById('counter');
+    const nameInput = document.getElementById('name');
+    const errorEl = document.getElementById('error');
+    const clickBtn = document.getElementById('clickBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    const leaderboardEl = document.getElementById('leaderboard');
+
+    let count = 0;
+
+    clickBtn.onclick = () => {
+      count += 1;
+      counterEl.textContent = count;
+      errorEl.textContent = '';
+    };
+
+    saveBtn.onclick = async () => {
+      const name = nameInput.value.trim();
+      if (!name) {
+        errorEl.textContent = 'Please enter your name to save.';
+        return;
+      }
+      if (count === 0) {
+        errorEl.textContent = 'Score must be greater than 0 to save.';
+        return;
+      }
+      errorEl.textContent = '';
+      try {
+        const res = await fetch('/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, score: count }),
+        });
+        if (!res.ok) {
+          const data = await res.json();
+          errorEl.textContent = data.error || 'Error saving score';
+          return;
+        }
+        count = 0;
+        counterEl.textContent = count;
+        loadLeaderboard();
+      } catch (err) {
+        errorEl.textContent = 'Error connecting to server';
+      }
+    };
+
+    const loadLeaderboard = async () => {
+      try {
+        const res = await fetch('/api/leaderboard');
+        const { scores } = await res.json();
+        leaderboardEl.innerHTML = '<h2>Leaderboard</h2>' + 
+          '<table border="1" cellpadding="4"><thead><tr><th>Rank</th><th>Name</th><th>Score</th><th>Date</th></tr></thead><tbody>' +
+          scores.map((s, i) =>
+            '<tr><td>' + (i+1) + '</td><td>' + s.name + '</td><td>' + s.score + '</td><td>' + new Date(s.createdAt).toLocaleString() + '</td></tr>'
+          ).join('') + '</tbody></table>';
+      } catch (err) {
+        leaderboardEl.innerHTML = '<p>Failed to load leaderboard</p>';
+      }
+    };
+
+    loadLeaderboard();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "nova-hello-world",
+  "version": "1.0.0",
+  "description": "Persistent click counter with leaderboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bawcbot/nova-hello-world-test.git"
+  },
+  "keywords": [],
+  "author": "Nova",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/bawcbot/nova-hello-world-test/issues"
+  },
+  "homepage": "https://github.com/bawcbot/nova-hello-world-test#readme",
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "express": "^5.2.1"
+  }
+}
